@@ -1,132 +1,245 @@
 <template>
-    <div class="main-container">
-      <header class="app-header">
-        <h1 class="app-title">Navegación con Quasar y Vue Router</h1>
-      </header>
-  
-      <!-- Quasar Tabs Navigation -->
-      <q-tabs v-model="tab" inline-label class="styled-tabs" @update:model-value="navigateToRoute">
-        <q-tab name="/" label="Inicio" />
-        <q-tab name="/deportes"  label="Deportes" />
-        <q-tab name="/servicio"  label="Servicio" />
-        <q-tab name="/habitaciones"  label="Habitaciones" />
-      </q-tabs>
-  
-       
-      <!--<nav class="navigation-links">
-        <h3><router-link to="/">Inicio</router-link></h3>
-        <h3><router-link to="/deportes">Deportes</router-link></h3>
-        <h3><router-link to="/servicio">Servicio</router-link></h3>
-        <h3><router-link to="/habitaciones">Habitaciones</router-link></h3>
-      </nav>-->
-  
-      <!-- Renderizado del componente según la ruta -->
-      <section class="content-section">
-        <router-view></router-view>
-      </section>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'App',
-    data() {
-      return {
-        tab: '/', // La pestaña seleccionada por defecto (ruta raíz)
-      };
-    },
-    watch: {
-      // Verifica cuando cambia la ruta para sincronizar la pestaña activa
-      $route(to) {
-        this.tab = to.path;
-      },
-    },
-    methods: {
-      // Redirigir a la ruta según el nombre de la pestaña
-      navigateToRoute(route) {
-        this.$router.push(route);
-      },
-    },
-    mounted() {
-      // Inicializa la pestaña seleccionada según la ruta actual
-      this.tab = this.$route.path;
-    },
-  };
-  </script>
-  
-  <style scoped>
-  /* Estilo general del contenedor principal */
-  .main-container {
-    font-family: 'Roboto', sans-serif;
-    color: #2c3e50;
-    padding: 20px;
-    margin: 0 auto;
-    max-width: 1200px;
+  <q-layout view="hHh LpR fFf" class="bg-black">
+
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar class="justify-between">
+        <q-btn dense flat round @click="toggleLeftDrawer" class="absolute-left">
+          <q-img
+            src="https://www.shareicon.net/data/2016/05/30/773043_multimedia_512x512.png"
+            style="width: 32px; height: 32px;"
+          />
+        </q-btn>
+
+        <q-toolbar-title class="title text-center" @click="$router.push('/')">
+          Hotel Colombia Fantasy
+        </q-toolbar-title>
+
+
+        <div v-if="user">
+          <q-avatar>
+            <q-img :src="user.photoURL" />
+          </q-avatar>
+        </div>
+        <q-btn
+          v-else
+          label="Login"
+          color="primary"
+          class="login-btn"
+          @click="showLoginModal = true"
+        />
+      </q-toolbar>
+    </q-header>
+
+    <!-- Menú lateral -->
+    <q-drawer
+      class="menu-bg"
+      show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
+      bordered
+    >
+      <q-list>
+        <q-item clickable v-ripple @click="$router.push('/')">
+          <q-item-section>
+            <q-item-label>Inicio</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple @click="$router.push('/Servicios')">
+          <q-item-section>
+            <q-item-label>Servicio</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple @click="$router.push('/habitaciones')">
+          <q-item-section>
+            <q-item-label>Habitaciones</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple @click="$router.push('/deportes')">
+          <q-item-section>
+            <q-item-label>Deportes</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple @click="$router.push('/contacto')">
+          <q-item-section>
+            <q-item-label>Contacto</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+
+    <q-dialog v-model="showLoginModal" persistent>
+      <q-card>
+        <q-card-section class="text-h6">Iniciar Sesión</q-card-section>
+
+        <q-card-section>
+          <q-input
+            v-model="email"
+            label="Correo electrónico"
+            type="email"
+            outlined
+          />
+          <q-input
+            v-model="password"
+            label="Contraseña"
+            type="password"
+            outlined
+            class="q-mt-sm"
+          />
+        </q-card-section>
+
+        <!-- Botones de Login con Google y Facebook -->
+        <q-card-section class="row justify-center q-my-md">
+          <q-btn
+            label="Continuar con Google"
+            icon="fa-brands fa-google"
+            color="red"
+            class="q-mr-md"
+            @click="loginWithGoogle"
+          />
+          <q-btn
+            label="Continuar con Facebook"
+            icon="fa-brands fa-facebook"
+            color="blue"
+            @click="loginWithFacebook"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" @click="showLoginModal = false" />
+          <q-btn label="Entrar" color="primary" @click="login" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-layout>
+</template>
+
+<script>
+import { ref } from 'vue'
+import { initializeApp } from 'firebase/app'
+import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth'
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+export default {
+  setup() {
+    const leftDrawerOpen = ref(false)
+    const showLoginModal = ref(false)
+    const email = ref('')
+    const password = ref('')
+    const user = ref(null)
+
+    const toggleLeftDrawer = () => {
+      leftDrawerOpen.value = !leftDrawerOpen.value
+    }
+
+    const login = () => {
+      console.log('Intentando iniciar sesión con:', email.value, password.value)
+      showLoginModal.value = false
+    }
+
+    const loginWithGoogle = () => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          user.value = result.user; 
+          console.log('Login con Google:', user.value);
+          showLoginModal.value = false;
+        })
+        .catch((error) => {
+          console.error('Error durante el login con Google:', error);
+        });
+    }
+
+    const loginWithFacebook = () => {
+      const provider = new FacebookAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          user.value = result.user; 
+          console.log('Login con Facebook:', user.value);
+          showLoginModal.value = false; 
+        })
+        .catch((error) => {
+          console.error('Error durante el login con Facebook:', error);
+        });
+    }
+
+    return {
+      leftDrawerOpen,
+      showLoginModal,
+      email,
+      password,
+      user,
+      toggleLeftDrawer,
+      login,
+      loginWithGoogle,
+      loginWithFacebook
+    }
   }
-  
-  /* Estilos para la cabecera */
-  .app-header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .app-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #1e88e5;
-  }
-  
-  /* Estilos para las rutas de navegación */
-  .navigation-links {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  
-  .navigation-links h3 {
-    margin: 0 15px;
-  }
-  
-  .navigation-links a {
-    text-decoration: none;
-    color: #1e88e5;
-    transition: color 0.3s ease;
-  }
-  
-  .navigation-links a:hover {
-    color: #ff5722;
-  }
-  
-  /* Estilos para las pestañas */
-  .styled-tabs {
-    margin: 0 auto;
-    background: linear-gradient(45deg, #1e88e5, #42a5f5);
-    border-radius: 8px;
-    padding: 10px;
-    max-width: 800px;
-    margin-bottom: 20px;
-  }
-  
-  .q-tab {
-    font-weight: bold;
-    font-size: 1rem;
-    color: #ffffff;
-  }
-  
-  .q-tab--active .q-tab__content {
-    color: #ffd54f; /* Color para la pestaña activa */
-  }
-  
-  .q-tab__icon {
-    color: #ffffff;
-  }
-  
-  /* Estilos para la sección de contenido */
-  .content-section {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  </style>
-  
+}
+</script>
+
+<style scoped>
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.title:hover {
+  transform: scale(1.1);
+  color: #ffeb3b;
+}
+
+.login-btn {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+}
+
+.bg-black {
+  background-color: black !important;
+}
+
+.menu-bg {
+  background-color: #1c1c1c;
+}
+
+.q-btn {
+  width: 100%;
+  max-width: 250px;
+}
+
+.fa-google {
+  margin-right: 8px;
+}
+
+.fa-facebook {
+  margin-right: 8px;
+}
+
+.social-button {
+  font-size: 20px;
+  color: #ffffff;
+  margin: 0 5px;
+}
+</style>
