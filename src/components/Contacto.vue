@@ -95,7 +95,7 @@
   </q-page-container>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue';
 
 export default {
