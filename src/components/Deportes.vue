@@ -57,7 +57,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 export default {
   data() {
     return {
