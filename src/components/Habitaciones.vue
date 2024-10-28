@@ -55,7 +55,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 export default {
