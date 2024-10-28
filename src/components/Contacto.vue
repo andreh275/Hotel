@@ -1,312 +1,305 @@
 <template>
-  <div class="hotel-page">
+  <q-page-container class="page-container">
+    <q-toolbar class="toolbar">
+      <q-toolbar-title>Contactos</q-toolbar-title>
 
-    <div class="form-history-icon" @click="toggleFormHistory">
-      🗃️ <span class="form-count">{{ submittedForms.length }}</span>
-    </div>
+      <!-- Icono con número de formularios enviados -->
+      <div class="icon-container" @click="toggleMenu">
+        <q-icon name="folder" size="32px" style="cursor: pointer; color: white;" />
+        <span class="badge">{{ submittedForms.length }}</span>
+      </div>
 
+      <!-- Menú desplegable con lista de formularios -->
+      <q-menu v-if="showMenu" class="menu-list">
+        <div v-if="submittedForms.length === 0">No hay formularios enviados</div>
+        <div v-for="(form, index) in submittedForms" :key="index" class="form-item">
+          <h4>{{ form.name }}</h4>
+          <p>Email: {{ form.email }}</p>
+          <p>Tel: {{ form.phone }}</p>
+          <p>Asunto: {{ form.subject }}</p>
+          <p>Mensaje: {{ form.message }}</p>
+          <hr />
+        </div>
+      </q-menu>
+    </q-toolbar>
 
-    <div v-if="showFormHistory" class="form-history">
-      <ul>
-        <li 
-          v-for="(form, index) in displayedForms" 
-          :key="index" 
-          class="form-item" 
-          @click="selectForm(index)"
-          :class="{ selected: selectedFormIndex === index }"
-        >
-          <div class="form-item-header">
-            <strong>Formulario {{ index + 1 }}</strong>
-          </div>
-          <p><strong>Nombre:</strong> {{ form.name }}</p>
-          <p><strong>Email:</strong> {{ form.email }}</p>
-          <p><strong>Teléfono:</strong> {{ form.phone }}</p>
-          <p><strong>Dirección:</strong> {{ form.address }}</p>
-          <button @click.stop="editForm(index)">Editar</button>
-          <button @click.stop="deleteForm(index)">Eliminar</button>
-        </li>
-      </ul>
-      <button v-if="submittedForms.length > 4" @click="showAllForms">
-        {{ showAll ? 'Ver Menos' : 'Ver Más' }}
-      </button>
-    </div>
-
-
-    <div class="contact-form">
+    <div class="contact-card">
       <h2>Contáctanos</h2>
       <form @submit.prevent="submitForm">
-        <input 
-          type="text" 
-          v-model="formData.name" 
-          placeholder="Nombre Completo" 
-          required 
-          @input="validateName"
-        />
-        <span v-if="errors.name" class="error">{{ errors.name }}</span>
-
-        <input 
-          type="email" 
-          v-model="formData.email" 
-          placeholder="Correo Electrónico" 
-          required
-          @input="validateEmail"
-        />
-        <span v-if="errors.email" class="error">{{ errors.email }}</span>
-
-        <input 
-          type="text" 
-          v-model="formData.phone" 
-          placeholder="Teléfono" 
-          required 
-          @input="validatePhone"
-        />
-        <span v-if="errors.phone" class="error">{{ errors.phone }}</span>
-
-        <textarea 
-          v-model="formData.message" 
-          placeholder="Mensaje"
-        ></textarea>
-
-        <input 
-          type="text" 
-          placeholder="Selecciona tu dirección en el mapa" 
-          v-model="formData.address" 
-          readonly 
-          required
-        />
-        <span v-if="errors.address" class="error">{{ errors.address }}</span>
-
-        <!-- Mapa debajo del input de dirección -->
-        <div class="map-container">
-          <p>📍 Selecciona tu ubicación en el mapa:</p>
-          <div ref="map" class="leaflet-map"></div>
+        <div class="form-group">
+          <label for="name">Nombre Completo</label>
+          <input type="text" id="name" v-model="formData.name" required />
         </div>
 
-        <button :disabled="!validateForm()" type="submit">Enviar</button>
-      </form>
-    </div>
+        <div class="form-group">
+          <label for="email">Correo Electrónico</label>
+          <input type="email" id="email" v-model="formData.email" required />
+        </div>
 
-    <div v-if="formSubmitted" class="form-submitted-icon">
-      ✔️ Formulario Enviado
+        <div class="form-group">
+          <label for="phone">Teléfono</label>
+          <input type="tel" id="phone" v-model="formData.phone" required />
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Asunto</label>
+          <input type="text" id="subject" v-model="formData.subject" required />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Mensaje</label>
+          <textarea id="message" v-model="formData.message" rows="4" required></textarea>
+        </div>
+
+        <button type="submit" class="submit-button">Enviar</button>
+      </form>
+
+      <div class="map-container">
+        <h3>Encuéntranos en esta ubicación</h3>
+        <iframe
+          width="100%"
+          height="250"
+          frameborder="0"
+          style="border:0"
+          :src="googleMapsUrl"
+          allowfullscreen
+        ></iframe>
+      </div>
     </div>
-  </div>
+    
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="contact-info">
+          <p>Email: contacto@hotel.com</p>
+          <p>Teléfono: +57 1 2345678</p>
+          <p>
+            Dirección: Calle Falsa 123, San Gil 
+            <a href="https://www.google.com/maps/place/Calle+Falsa+123,+San+Gil,+Santander/@6.5714846,-73.1341889,15z/data=!4m6!3m5!1s0x8e4a1cb34ebf89f7:0xa3ab7d2b490a2b94!8m2!3d6.5714846!4d-73.1341889!16s%2Fg%2F11gq_pnxtk?entry=ttu" target="_blank">
+              <img src="https://img.icons8.com/ios-filled/50/ffffff/map-marker.png" alt="Mapa" />
+            </a>
+          </p>
+        </div>
+        <div class="social-media">
+          <a href="https://www.facebook.com" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/facebook-new.png" alt="Facebook" />
+          </a>
+          <a href="https://www.instagram.com" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram" />
+          </a>
+          <a href="https://www.twitter.com" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/twitter-squared.png" alt="Twitter" />
+          </a>
+        </div>
+      </div>
+    </footer>
+  </q-page-container>
 </template>
 
 <script>
-import Swal from 'sweetalert2';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { ref } from 'vue';
 
 export default {
-  data() {
-    return {
-      formData: {
+  name: 'Contactos',
+  setup() {
+    const formData = ref({
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+    });
+
+    const submittedForms = ref([]); 
+    const showMenu = ref(false); 
+    const googleMapsUrl = ref(
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345094725!2d144.95373531531853!3d-37.816279179751984!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d43f4f9e7b1%3A0x5045675218ce6e0!2sMelbourne%20VIC%2C%20Australia!5e0!3m2!1sen!2sau!4v1604296168881!5m2!1sen!2sau'
+    );
+
+    const submitForm = () => {
+      // Guardar los datos enviados en el array
+      submittedForms.value.push({ ...formData.value });
+
+      // Resetear el formulario
+      formData.value = {
         name: '',
         email: '',
         phone: '',
+        subject: '',
         message: '',
-        address: '',
-      },
-      errors: {
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-      },
-      showFormHistory: false,
-      submittedForms: [],
-      map: null,
-      marker: null,
-      formSubmitted: false,
-      selectedFormIndex: null, 
-      showAll: false, 
+      };
+
+      console.log('Formulario enviado:', submittedForms.value);
     };
-  },
-  computed: {
-    displayedForms() {
-      return this.showAll ? this.submittedForms : this.submittedForms.slice(-4);
-    },
-  },
-  methods: {
-    validateName() {
-      const namePattern = /^[a-zA-Z\s]+$/;
-      this.errors.name = namePattern.test(this.formData.name)
-        ? ''
-        : 'El nombre solo puede contener letras y espacios.';
-    },
-    validateEmail() {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      this.errors.email = emailPattern.test(this.formData.email)
-        ? ''
-        : 'Por favor, ingresa un correo válido.';
-    },
-    validatePhone() {
-      const phonePattern = /^\d+$/;
-      this.errors.phone = phonePattern.test(this.formData.phone)
-        ? ''
-        : 'El teléfono solo puede contener números.';
-    },
-    validateForm() {
-      this.errors = {};
 
-      if (!this.formData.name) this.errors.name = 'El nombre es obligatorio.';
-      if (!this.formData.email) this.errors.email = 'El correo es obligatorio.';
-      if (!this.formData.phone) this.errors.phone = 'El teléfono es obligatorio.';
-      if (!this.formData.address) this.errors.address = 'La dirección es obligatoria.';
+    const toggleMenu = () => {
+      showMenu.value = !showMenu.value; 
+    };
 
-      return Object.keys(this.errors).length === 0;
-    },
-    async submitForm() {
-      if (this.validateForm()) {
-        this.submittedForms.push({ ...this.formData });
-        localStorage.setItem('submittedForms', JSON.stringify(this.submittedForms));
-        Swal.fire({
-          title: '¡Formulario Enviado!',
-          text: 'Nos pondremos en contacto contigo pronto.',
-          icon: 'success',
-          position: 'top-center',
-        });
-        this.formSubmitted = true;
-        this.resetForm();
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: 'Por favor, corrige los errores en el formulario.',
-          icon: 'error',
-        });
-      }
-    },
-    resetForm() {
-      this.formData = { name: '', email: '', phone: '', message: '', address: '' };
-      this.formSubmitted = false;
-      if (this.marker) this.marker.remove();
-    },
-    toggleFormHistory() {
-      this.showFormHistory = !this.showFormHistory;
-    },
-    showAllForms() {
-      this.showAll = !this.showAll;
-    },
-    selectForm(index) {
-      this.selectedFormIndex = index; 
-      this.formData = { ...this.submittedForms[index] }; 
-    },
-    editForm(index) {
-      this.selectForm(index); 
-    },
-    deleteForm(index) {
-      this.submittedForms.splice(index, 1); 
-      localStorage.setItem('submittedForms', JSON.stringify(this.submittedForms));
-      if (this.selectedFormIndex === index) {
-        this.selectedFormIndex = null; 
-      }
-    },
-    async initMap() {
-      this.map = L.map(this.$refs.map).setView([-34.397, 150.644], 8);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap',
-      }).addTo(this.map);
-
-      this.map.on('click', async (event) => {
-        const { lat, lng } = event.latlng;
-        await this.getAddress(lat, lng);
-
-        if (this.marker) {
-          this.marker.remove();
-        }
-
-        this.marker = L.marker([lat, lng], { bounceOnAdd: true }).addTo(this.map);
-      });
-    },
-    async getAddress(lat, lng) {
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-        const data = await response.json();
-        this.formData.address = data.display_name;
-      } catch (error) {
-        console.error('Error al obtener la dirección:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo obtener la dirección. Inténtalo de nuevo.',
-          icon: 'error',
-        });
-      }
-    },
-  },
-  mounted() {
-    this.initMap();
-    const storedForms = JSON.parse(localStorage.getItem('submittedForms'));
-    if (storedForms) this.submittedForms = storedForms;
+    return {
+      formData,
+      submittedForms,
+      showMenu,
+      googleMapsUrl,
+      submitForm,
+      toggleMenu,
+    };
   },
 };
 </script>
 
 <style scoped>
-.hotel-page {
+.page-container {
   background: linear-gradient(to right, #2196f3, #ffca28);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.toolbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #000;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-container {
   position: relative;
-}
-
-.contact-form {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  width: 400px;
-}
-
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-.error {
-  color: red;
-  font-size: 0.9em;
-}
-
-.leaflet-map {
-  width: 100%;
-  height: 300px;
-}
-
-.map-container {
-  margin-top: 20px;
-}
-
-.form-history {
-  position: absolute;
-  top: 50px;
-  right: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  padding: 10px;
-  overflow: auto;
-  max-height: 400px;
-}
-
-.form-history-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
 
-.form-submitted-icon {
-  margin-top: 10px;
-  font-size: 2em;
-  color: green;
+.badge {
+  background-color: #ff4081;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.menu-list {
+  position: absolute;
+  top: 40px;
+  right: 10px;
+  background-color: #333;
+  color: white;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+}
+
+.form-item h4 {
+  margin: 5px 0;
+  color: #FFD700;
+}
+
+.contact-card {
+  max-width: 500px;
+  margin-top: 80px;
+  padding: 15px;
+  background-color: #000;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  font-family: 'Georgia', serif;
+  color: #fff;
+}
+
+h2, h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #FFD700;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #FFD700;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #333;
+  color: #fff;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #FFD700;
+  color: black;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #e6c200;
+}
+
+.map-container {
+  margin-top: 15px;
+  text-align: center;
+}
+.footer {
+  background: #333;
+  color: #fff;
+  padding: 20px;
+}
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer {
+  width: 100%; 
+  background-color: #0dc48d;
+  color: #ffffff;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer-content {
+  width: 90%;
+  max-width: 1400px; 
+  margin: 0 auto; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+footer.footer{
+  padding: 0;
+  max-width: 150%;
+  margin-top: 20px;
+  margin-left: -20px;
+  margin-bottom: -20px;
 }
 </style>
