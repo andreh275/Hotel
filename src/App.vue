@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh LpR fFf" class="bg-black">
-
+    <!-- Encabezado -->
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="justify-between">
         <q-btn dense flat round @click="toggleLeftDrawer" class="absolute-left">
@@ -14,7 +14,7 @@
           Hotel Colombia Fantasy
         </q-toolbar-title>
 
-
+        <!-- Botón de Login o imagen de usuario -->
         <div v-if="user">
           <q-avatar>
             <q-img :src="user.photoURL" />
@@ -71,11 +71,12 @@
       </q-list>
     </q-drawer>
 
-
+    <!-- Contenido principal -->
     <q-page-container>
       <router-view />
     </q-page-container>
 
+    <!-- Modal de Login -->
     <q-dialog v-model="showLoginModal" persistent>
       <q-card>
         <q-card-section class="text-h6">Iniciar Sesión</q-card-section>
@@ -127,6 +128,7 @@ import { ref } from 'vue'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth'
 
+// Tu configuración de Firebase
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_AUTH_DOMAIN",
@@ -135,6 +137,7 @@ const firebaseConfig = {
   messagingSenderId: "TU_MESSAGING_SENDER_ID",
   appId: "TU_APP_ID",
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -145,7 +148,7 @@ export default {
     const showLoginModal = ref(false)
     const email = ref('')
     const password = ref('')
-    const user = ref(null)
+    const user = ref(null) 
 
     const toggleLeftDrawer = () => {
       leftDrawerOpen.value = !leftDrawerOpen.value
@@ -162,7 +165,7 @@ export default {
         .then((result) => {
           user.value = result.user; 
           console.log('Login con Google:', user.value);
-          showLoginModal.value = false;
+          showLoginModal.value = false; 
         })
         .catch((error) => {
           console.error('Error durante el login con Google:', error);
@@ -240,6 +243,6 @@ export default {
 .social-button {
   font-size: 20px;
   color: #ffffff;
-  margin: 0 5px;
+  margin: 0 5px; 
 }
 </style>
